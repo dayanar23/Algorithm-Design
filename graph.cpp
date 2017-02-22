@@ -1,6 +1,7 @@
 #include <vector>
 #include <cstdio>
 #include <utility>
+#include <algorithm>
 //#include <iostream.h>
 
 using namespace std;
@@ -16,10 +17,15 @@ Node removeEdge( Node n, Edge e);
 bool evenDegree(Node n);
 bool isEulerian(Graph g);
 
+
 // data struct for nodes
 struct Node{
 	int node;
 	vector<Edge> edges; // list of edges
+
+	bool operator==(const Node &n1) const {
+	return node == n1.node && edges == n1.edges;
+	}
 };
 
 // data struct for the graph's edges
@@ -28,6 +34,12 @@ struct Edge{
 	int be;			// benefit of cross
 	int ce;			// cost of cross
 	bool crossed; 	// true if the edge was already crossed
+
+	bool operator==(const Edge &e1) const{
+	return s_node == e1.s_node && 
+			be == e1.be && ce == e1.ce &&
+			crossed == e1.crossed;
+		}
 
 	// calculate the benefit of cross an edge
 	int get_benefit(){
@@ -77,7 +89,8 @@ Graph removeNode(Graph graph, Node node){
 			}
 		}
 	}
-	graph.nodes.erase(std::remove(node));
+	vector<Node>::iterator position = std::find(graph.nodes.begin(), graph.nodes.end(), node);
+	graph.nodes.erase(position);
 	return graph;
 }
 
@@ -91,7 +104,8 @@ Node addEdge(Node node, Edge edge){
 // remove an edge
 Node removeEdge(Node node, Edge edge){
 	Node aux = edge.s_node;
-	node.edges.remove(edge);
+	vector<Edge>::iterator position = std::find(node.edges.begin(), node.edges.end(), edge);
+	node.edges.erase(position);
 	for(int i=0; i<aux.edges.size(); i++){
 		if(aux.edges[i].s_node == node){
 			removeEdge(aux,aux.edges[i]);
@@ -117,12 +131,13 @@ bool isEulerian(Graph graph){
 	bool cn = true;
 	int i = 0;
 	while (cn or i<graph.nodes.size()){
-		cn = evenDegree(graph.nodes[i])
+		cn = evenDegree(graph.nodes[i]);
 		i += 1;
 	}
 	return cn;
 
 }
+
 
 // calculate the std percent
 float calculate_std(int vo, int vh){
