@@ -13,6 +13,9 @@ class Graph {
 	int edges; 			// num of edges
 	list<int> *a_list; 	// adjacency lists of the nodes
 	list<int> *euler_t; // euler tour
+	list<int> *crossed;	// count the number of cross 
+	list<int> *cost;	// cost of the edges
+	list<int> *benefit; // benefits of the edges
 
 	// methods of the class
 	public:
@@ -38,6 +41,18 @@ class Graph {
 		// delete edge of a tour
 		void deleteTour(int sn, int fn);
 
+		// sum a cross count
+		void addCross(int fn);
+
+		// add an edge cost
+		void addCost(int ed, int cost);
+
+		// add an edge benefit
+		void addBenefit(int ed, int benef);
+
+		// initialize crossed with zeros
+		void fillCross();
+
 		// determinate if the nodes of the graphs have even degree
     	bool allEvenDegree();
 
@@ -53,7 +68,19 @@ Graph::Graph(int vertex, int edges) {
 		this-> vertex = vertex; 
 		this-> edges = edges;
 		a_list = new list<int>[vertex];
+		euler_t = new list<int>[vertex];
+		crossed = new list<int>[1];
+		cost = new list<int>[edges];
+		benefit = new list<int>[edges];
+
 	}
+
+void Graph::fillCross(){
+	for (int i = 0; i < vertex; ++i){
+		list<int>::iterator it = crossed[i].begin();
+		*it=0;
+	}
+}
 
 // add an edge
 void Graph::addEdges(int fn, int sn) { 
@@ -65,7 +92,7 @@ void Graph::addEdges(int fn, int sn) {
 void Graph::deleteEdges(int fn, int sn){
 	list<int>::iterator it1= find( a_list[fn].begin(), a_list[fn].end(), sn);
 	*it1 = -1;
-	list<int>::iterator it2 = find(a_list[sn].begin(), a_list[sn].end(), fn);
+	list<int>::iterator it2= find( a_list[sn].begin(), a_list[sn].end(), fn);
 	*it2 = -1;
 }
 
@@ -78,6 +105,20 @@ void Graph::addTour(int fn, int sn) {
 void Graph::deleteTour(int fn, int sn){
 	list<int>::iterator it = find(euler_t[fn].begin(), euler_t[fn].end(), sn);
 	*it = -1;
+}
+
+// add an tour
+void Graph::addCross(int fn) { 
+	list<int>::iterator it = a_list[fn].begin();
+	*it = *it +1;
+}
+
+void Graph::addCost(int edge, int ct){
+	cost[edge].push_back(ct);
+}
+
+void Graph::addBenefit(int edge, int benef){
+	benefit[edge].push_back(benef);
 }
 
 // calculate the euler tour
@@ -95,12 +136,18 @@ void Graph::eulerTour() {
 
 // save the euler tour
 void Graph::saveTour(int n){
-  list<int>::iterator it;
+  list<int>::iterator it, aux;
 	for (it = a_list[n].begin(); it != a_list[n].end(); ++it){
 		int sn = *it;
 		if (sn != -1 && isValidEdge(n, sn)){
-			cout << n << "-" << sn << " ";
-			deleteEdges(n, sn);
+			addTour(n,sn);
+			aux = crossed[n].begin();
+			if(*aux == 2){
+				deleteEdges(n, sn);
+			}
+			else{
+				addCross(n);
+			}
 			saveTour(sn);
 		}
 	}
@@ -161,29 +208,29 @@ int Graph::countVertex(int n, bool visited[]) {
 
 int main(){
 
+
 	Graph g1(4,8);
 	g1.addEdges(0, 1);
 	g1.addEdges(0, 2);
 	g1.addEdges(1, 2);
+	g1.addEdges(1, 3);
+	g1.addEdges(3, 5);
+	g1.addEdges(1, 4);
+	g1.addEdges(2, 4);
 	g1.addEdges(2, 3);
+	g1.addEdges(4, 3);
+	g1.addEdges(4, 5);
+	g1.fillCross();
 	g1.eulerTour();
 
-	Graph g2(3,6);
-	g2.addEdges(0, 1);
-	g2.addEdges(1, 2);
-	g2.addEdges(2, 0);
-	g2.eulerTour();
-
-	Graph g3(5,10);
-	g3.addEdges(1, 0);
-	g3.addEdges(0, 2);
-	g3.addEdges(2, 1);
-	g3.addEdges(0, 3);
-	g3.addEdges(3, 4);
-	g3.addEdges(3, 2);
-	g3.addEdges(3, 1);
-	g3.addEdges(2, 4);
-	g3.eulerTour();
 
 	return 0;
+
+// TODO:
+	/*
+
+		hacer una clase Instancia con los nodos requeridos y los que no y lo que falte
+
+	*/
+
 }
