@@ -1,33 +1,68 @@
 #include <iostream>
 #include <string.h>
+#include <fstream>
 #include <algorithm>
 #include <list>
 #include <vector>
 
 using namespace std;
 
+
+class Edge{
+
+	public:
+	
+	int n1;
+	int n2;
+	int cost;
+	int benef;
+	bool crossed;
+
+	Edge(int n1, int n2, int c, int b){
+		this->n1 = n1;
+		this->n2 = n2;
+		this->cost = c;
+		this->benef = b;
+		this->crossed =false;
+	}
+
+	bool operator==(const Edge &e1) const {
+		return n1 == e1.n1 && n2 == e1.n2 &&
+				cost == e1.cost && benef == e1.benef
+				&& crossed == e1.crossed;
+	}
+
+	int getBenefit(){
+		if(!crossed){
+			return benef-cost;
+		}
+		return benef-2*cost;
+	}
+
+};
+
+void printEd(std::vector<Edge> v);
+bool minCost(Edge edge);
 // class that represents the raph
 class Graph {
 
-	int vertex; 		// num of vertices
-	int edges; 			// num of edges
-	list<int> *a_list; 	// adjacency lists of the nodes
-	list<int> *euler_t; // euler tour
-	list<int> *crossed;	// count the number of cross 
-	list<int> *cost;	// cost of the edges
-	list<int> *benefit; // benefits of the edges
-
 	// methods of the class
 	public:
-		
+
+	int vertex; 		// num of vertices
+	int edges; 			// num of edges
+	bool deposit;
+	vector<Edge> a_list; 	// adjacency lists of the nodes
+	vector<Edge> euler_t; // euler tour
+	bool visited[];
 		//constructor
-		Graph(int vertex, int edges);
+		Graph(int vertex, int edges, vector<Edge> &es);
 
 		// add a pair of edges
-		void addEdges(int fn, int sn);
+		void addEdges(Edge edge);
 
 		// delete a pair of edges
-		void deleteEdges(int fn, int sn);
+		void deleteEdges(Edge edge);
 
 		// methods of euler tour
 		void eulerTour();
@@ -36,119 +71,102 @@ class Graph {
 		void saveTour(int n);
 
 		// add edge on a tour
-		void addTour(int fn, int sn);
+		void addTour(Edge edge);
 
 		// delete edge of a tour
-		void deleteTour(int sn, int fn);
+		void deleteTour(Edge edge);
 
 		// sum a cross count
-		void addCross(int fn);
+		void addCross(Edge edge);
 
-		// add an edge cost
-		void addCost(int ed, int cost);
+		int countEdges(Edge edge);
 
-		// add an edge benefit
-		void addBenefit(int ed, int benef);
-
-		// initialize crossed with zeros
-		void fillCross();
+		int countBenefit(vector<Edge> tour);
 
 		// determinate if the nodes of the graphs have even degree
     	bool allEvenDegree();
 
 		// counts the vertices reachable from a node sn
-		int countVertex(int sn, bool visited[]);
+		int countVertex(int n, bool visited[]);
 
 		// determinate if a edge can be in euler tour
-		bool isValidEdge(int fn, int sn);
+		bool isValidEdge(Edge egde);
+
+		bool minCost(Edge edge);
+
+		void markVisited(Edge edge);
 
 };
 
-Graph::Graph(int vertex, int edges) { 
+Graph::Graph(int vertex, int edges, vector<Edge> &eds) { 
 		this-> vertex = vertex; 
 		this-> edges = edges;
-		a_list = new list<int>[vertex];
-		euler_t = new list<int>[vertex];
-		crossed = new list<int>[1];
-		cost = new list<int>[edges];
-		benefit = new list<int>[edges];
-
+		this-> a_list = eds;
+		this-> deposit = false;
 	}
-
-void Graph::fillCross(){
-	for (int i = 0; i < vertex; ++i){
-		list<int>::iterator it = crossed[i].begin();
-		*it=0;
-	}
-}
 
 // add an edge
-void Graph::addEdges(int fn, int sn) { 
-	a_list[fn].push_back(sn);
-	a_list[sn].push_back(fn); 
+void Graph::addEdges(Edge edge) { 
+	a_list.push_back(edge); 
 }
 
-// remove and edge (puts value -1)
-void Graph::deleteEdges(int fn, int sn){
-	list<int>::iterator it1= find( a_list[fn].begin(), a_list[fn].end(), sn);
-	*it1 = -1;
-	list<int>::iterator it2= find( a_list[sn].begin(), a_list[sn].end(), fn);
-	*it2 = -1;
+// remove and edge
+void Graph::deleteEdges(Edge edge){
+	vector<Edge>::iterator it = find(a_list.begin(), a_list.end(), edge);
+	a_list.erase(it);
 }
 
 // add an tour
-void Graph::addTour(int fn, int sn) { 
-	euler_t[fn].push_back(sn);
+void Graph::addTour(Edge edge) { 
+	euler_t.push_back(edge);
 }
 
 // delete a tour
-void Graph::deleteTour(int fn, int sn){
-	list<int>::iterator it = find(euler_t[fn].begin(), euler_t[fn].end(), sn);
-	*it = -1;
+void Graph::deleteTour(Edge edge){
+	vector<Edge>::iterator it = find(euler_t.begin(), euler_t.end(), edge);
+	euler_t.erase(it);
 }
 
 // add an tour
-void Graph::addCross(int fn) { 
-	list<int>::iterator it = a_list[fn].begin();
-	*it = *it +1;
-}
-
-void Graph::addCost(int edge, int ct){
-	cost[edge].push_back(ct);
-}
-
-void Graph::addBenefit(int edge, int benef){
-	benefit[edge].push_back(benef);
+void Graph::addCross(Edge edge){ 
+	Edge aux = edge;
+	aux.crossed = aux.crossed +1;
+	vector<Edge>::iterator it = find(a_list.begin(), a_list.end(), edge);
+	a_list.erase(it);
+	a_list.insert(it, aux);
 }
 
 // calculate the euler tour
 void Graph::eulerTour() {
   int n = 0;
-  for (int i = 0; i < vertex; i++){
-	  	if (a_list[i].size() & 1){
+  for (int i = 0; i < edges; i++){
+	  	if (countEdges(a_list[i]) % 2 == 0){
 	  	   n = i; 
 	  	   break;  
   		}
 	}
-
-	saveTour(n);
+		saveTour(n);
+	
 }
 
 // save the euler tour
 void Graph::saveTour(int n){
-  list<int>::iterator it, aux;
-	for (it = a_list[n].begin(); it != a_list[n].end(); ++it){
-		int sn = *it;
-		if (sn != -1 && isValidEdge(n, sn)){
-			addTour(n,sn);
-			aux = crossed[n].begin();
-			if(*aux == 2){
-				deleteEdges(n, sn);
+
+	//cout<< n<< endl;
+  int aux;
+	for (int i=0; i< a_list.size(); i++){
+		if (a_list[i].n1 == n 
+			//&& isValidEdge(a_list[i])
+			&& minCost(a_list[i]) 
+			&& !deposit){
+			aux = a_list[i].n2;
+			addTour(a_list[i]);
+			if(aux == 0){
+				deposit = true;
 			}
-			else{
-				addCross(n);
-			}
-			saveTour(sn);
+			markVisited(a_list[i]);
+			deleteEdges(a_list[i]);
+			saveTour(aux);
 		}
 	}
 }
@@ -158,7 +176,7 @@ bool Graph::allEvenDegree(){
 	bool ev = true;
 	int i = 0;
     while (ev && i < vertex){
-    	if (a_list[i].size() % 2 == 0){
+    	if (countEdges(a_list[i]) % 2 == 0){
             ev = true;
             i++;
         } else{
@@ -169,67 +187,169 @@ bool Graph::allEvenDegree(){
     return ev;
 }
 
-// determinate if a vertex can be on euler tour
-bool Graph::isValidEdge(int fn, int sn) {
-	bool visited[vertex];
+int Graph::countEdges(Edge edge){
 	int c = 0; 
-	list<int>::iterator it;
-	for (it = a_list[fn].begin(); it != a_list[fn].end(); ++it){
-		if (*it != -1){
+	for (int i=0; i < edges; i++){
+		if (a_list[i].n1 == edge.n1){
 			c++;
 		}
 	}
+	return c;
+}
+
+
+// determinate if a vertex can be on euler tour
+bool Graph::isValidEdge(Edge edge) {
+
+	if(edge.crossed > 1){
+		return false;
+	}
+
+	int c = countEdges(edge);
+
 	if (c == 1){
 		return true;
 	}
 	
 	memset(visited, false, vertex);
-	int c1 = countVertex(fn, visited);
-	deleteEdges(fn, sn);
+	int c1 = countVertex(edge.n1, visited);
+	deleteEdges(edge);
 	memset(visited, false, vertex);
-	int c2 = countVertex(fn, visited);
-	addEdges(fn, sn);
+	int c2 = countVertex(edge.n1, visited);
+	addEdges(edge);
 	
-	return (c1 > c2)? false: true;
+	if(c1 > c2){
+		return false;
+	} 
+	return true;
 }
 
+int Graph::countBenefit(vector<Edge> tour){
+	int be=0;
+	for(int i =0; i<tour.size(); i++){
+		be = tour[i].getBenefit();
+	}
+	return be;
+}
+
+
 // count the vertex rechaeble from node n
-int Graph::countVertex(int n, bool visited[]) {
+int Graph::countVertex(int n, bool visite[]) {
 	visited[n] = true;
 	int c = 1;
 
-	list<int>::iterator it;
-	for (it = a_list[n].begin(); it != a_list[n].end(); ++it)
-		if (*it != -1 && !visited[*it])
-			c += countVertex(*it, visited);
+	vector<Edge> aux;
+	for (int i=0; i<a_list.size(); i++){
+		if(a_list[i].n1 == n){
+			aux.push_back(a_list[i]);
+		}
+	}
+	for (int i = 0; i < aux.size(); i++){
+		if (!visited[aux[i].n2]){
+			return c;
+			c += countVertex(a_list[i].n2, visited);
+		}
+	}
 
 	return c;
 }
 
-int main(){
+bool Graph::minCost(Edge edge){
+	int cos = 0; //max int;
+	vector<Edge> aux;
+	for(int i=0; i< a_list.size(); i++){
+		if(a_list[i].n1 == edge.n1){
+			aux.push_back(a_list[i]);
+		}
+	}
+	for(int i=0; i<aux.size(); i++){
+		if(aux[i].benef > cos){
+			cos = aux[i].benef;
+		}
+	}
+	if(edge.cost == cos){
+		return true;
+	}
+	return false;
+}
 
+void printEd(std::vector<Edge> v){
+	for (int i=0; i< v.size(); i++){
+		cout << v[i].n1 << "-" << v[i].n2 << endl;
+	}
+}
 
-	Graph g1(4,8);
-	g1.addEdges(0, 1);
-	g1.addEdges(0, 2);
-	g1.addEdges(1, 2);
-	g1.addEdges(1, 3);
-	g1.addEdges(3, 5);
-	g1.addEdges(1, 4);
-	g1.addEdges(2, 4);
-	g1.addEdges(2, 3);
-	g1.addEdges(4, 3);
-	g1.addEdges(4, 5);
-	g1.fillCross();
+void Graph::markVisited(Edge edge){
+	for (int i = 0; i < a_list.size(); ++i){
+		if(a_list[i].n1 == edge.n2 && a_list[i].n2 == edge.n1){
+			a_list[i].crossed = true;
+		}
+	}
+	
+}
+
+int main(int argc, char **argv){
+
+	Edge e1(0,1,2,10);
+	Edge e2(0,2,10,0);
+	Edge e3(1,2,3,2);
+	Edge e4(1,3,20,5);
+	Edge e5(3,5,9,1);
+	Edge e6(1,4,1,3);
+	Edge e7(2,4,5,4);
+	Edge e8(2,3,3,4);
+	Edge e9(4,3,2,8);
+	Edge e10(4,5,8,1);
+
+	Edge e11(1,0,2,10);
+	Edge e12(2,0,10,0);
+	Edge e13(2,1,3,2);
+	Edge e14(3,1,20,5);
+	Edge e15(5,3,9,1);
+	Edge e16(4,1,1,3);
+	Edge e17(4,2,5,4);
+	Edge e18(3,2,3,4);
+	Edge e19(3,4,2,8);
+	Edge e20(5,4,8,1);
+
+	std::vector<Edge> v;
+
+	v.push_back(e1);
+	v.push_back(e2);
+	v.push_back(e3);
+	v.push_back(e4);
+	v.push_back(e5);
+	v.push_back(e6);
+	v.push_back(e7);
+	v.push_back(e8);
+	v.push_back(e9);
+	v.push_back(e10);
+	v.push_back(e11);
+	v.push_back(e12);
+	v.push_back(e13);
+	v.push_back(e14);
+	v.push_back(e15);
+	v.push_back(e16);
+	v.push_back(e17);
+	v.push_back(e18);
+	v.push_back(e19);
+	v.push_back(e20);
+
+	Graph g1(5,10,v);
 	g1.eulerTour();
+
+	// EULER_T ESTA VACIO
+	for(int i =0; i<g1.euler_t.size(); i++){
+		cout << g1.euler_t[i].n1 << "-" << g1.euler_t[i].n2 << endl;
+	}
 
 
 	return 0;
 
-// TODO:
+// TO DO:
 	/*
 
-		hacer una clase Instancia con los nodos requeridos y los que no y lo que falte
+	FALTA VERIFICAR QUE LOS VERTICES DEL CAMINO TENGAN SENTIDO
 
 	*/
 

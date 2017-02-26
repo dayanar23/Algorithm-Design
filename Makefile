@@ -1,10 +1,10 @@
 CXX = g++
 OPT = -g -Wall -O3
 
-output: eulerTour.cpp
-	$(CXX) $(OPT) eulerTour.cpp -o $@
+main: eurelTour.cpp
+	$(CXX) $(OPT) eurelTour.cpp -o $@
 	rm -f $*.c
 
 .PHONY: clean
 clean:
-	rm -f output *.o *~
+	rm -f main *.o *~
