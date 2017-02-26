@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string.h>
 #include <fstream>
+#include <sstream>
 #include <algorithm>
 #include <list>
 #include <vector>
@@ -56,6 +57,9 @@ class Graph {
 	vector<Edge> euler_t; // euler tour
 	bool visited[];
 		//constructor
+		Graph();
+
+		// constructor
 		Graph(int vertex, int edges, vector<Edge> &es);
 
 		// add a pair of edges
@@ -288,7 +292,96 @@ void Graph::markVisited(Edge edge){
 	
 }
 
+Graph * buildGraph(string filename) {
+
+	// Auxiliar variables to easy the file reading
+	stringstream sstream;
+	string line; 
+	string tmp;
+
+	int vertex, edges, n_edges;
+	int src, dst;
+	int cost, benef;
+	char c;
+
+	vector<Edge> eds;           // edges vector
+
+	ifstream file (filename);   // file stream
+
+	if ( file.is_open() ) {
+
+		getline(file, line);
+		
+		sstream.str(line);
+		sstream >> tmp >> tmp >> tmp >> c >> vertex;
+		
+		getline(file, line);
+
+		sstream.clear();	
+		sstream.str(line);
+		sstream >> tmp >> tmp >> tmp >> tmp >> edges;
+
+		for ( int i = 0 ; i < edges ; ++i ) {
+			getline(file, line);
+
+			sstream.clear();
+			sstream.str(line);
+
+			sstream >> src;
+			sstream >> dst;
+			sstream >> cost;
+			sstream >> benef;
+
+			Edge edge(src, dst, cost, benef);
+			eds.push_back(edge);
+		}
+
+		getline(file, line);
+		sstream.clear();	
+		sstream.str(line);
+		sstream >> tmp >> tmp >> tmp >> tmp >> tmp >> n_edges;
+
+		edges += n_edges;
+
+		for ( int i = 0 ; i < n_edges ; ++i ) {
+			getline(file, line);
+
+			sstream.clear();
+			sstream.str(line);
+
+			sstream >> src;
+			sstream >> dst;
+			sstream >> cost;
+			sstream >> benef;
+
+			Edge edge(src, dst, cost, benef);
+			eds.push_back(edge);
+		}
+
+		static Graph graph(vertex, edges, eds);
+
+		return &graph;
+
+    }  else cout << "Unable to open file"; 
+
+    return NULL;
+
+}
+
+
 int main(int argc, char **argv){
+
+	Graph *graph;
+	string filename;
+
+	filename = argv[1];
+	
+	graph = buildGraph(filename);
+	graph-> eulerTour();
+
+	for(int i =0; i<graph-> euler_t.size(); i++){
+		cout << graph-> euler_t[i].n1 << "-" << graph-> euler_t[i].n2 << endl;
+	}
 
 	Edge e1(0,1,2,10);
 	Edge e2(0,2,10,0);
