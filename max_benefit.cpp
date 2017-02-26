@@ -1,9 +1,4 @@
-// Universidad Simón Bolívar
-// CI
-
-#include <iostream>
-#include <string.h>
-#include <fstream>
+// Module for calculate max benefit path
 #include <stdio.h>
 #include <limits.h>
 #include <vector>
@@ -192,8 +187,20 @@ int secondPath(Graph g, int last_v){
 }
 
 
-int main() {
+int main(int argc, char **argv) {
 
+  Graph *graph;
+  string filename;
+
+  filename = argv[1];
+
+  graph = buildGraph(filename);
+
+  printEdges(graph->a_list);
+
+  cout << firstPath(*graph,0) + secondPath(*graph,5) << endl;
+
+ /* 
   Edge e1(0,1,2,10);
   Edge e2(0,2,10,0);
   Edge e3(1,2,3,2);
@@ -241,7 +248,7 @@ int main() {
 
   Graph g1(6,20,v);
 
-  cout << firstPath(g1,0) + secondPath(g1,5) << endl;
+  cout << firstPath(g1,0) + secondPath(g1,5) << endl;*/
   
   return 0;
 }

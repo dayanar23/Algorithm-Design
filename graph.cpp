@@ -1,3 +1,8 @@
+// Module for class definition
+#include <iostream>
+#include <string.h>
+#include <fstream>
+#include <sstream>
 #include <stdio.h>
 #include <vector>
   
@@ -101,3 +106,79 @@ class Graph{
   }
 
 };
+
+Graph * buildGraph(string filename) {
+
+  // Auxiliar variables to ease file reading
+  stringstream sstream;
+  string line; 
+  string tmp;
+
+  int vertex, edges, n_edges;
+  int src, dst;
+  int cost, benef;
+  char c;
+
+  vector<Edge> eds;           // edges vector
+
+  ifstream file(filename.c_str());   // file stream
+
+  if ( file.is_open() ) {
+
+    getline(file, line);
+    
+    sstream.str(line);
+    sstream >> tmp >> tmp >> tmp >> c >> vertex;
+    
+    getline(file, line);
+
+    sstream.clear();  
+    sstream.str(line);
+    sstream >> tmp >> tmp >> tmp >> tmp >> edges;
+
+    for ( int i = 0 ; i < edges ; ++i ) {
+      getline(file, line);
+
+      sstream.clear();
+      sstream.str(line);
+
+      sstream >> src;
+      sstream >> dst;
+      sstream >> cost;
+      sstream >> benef;
+
+      Edge edge(src, dst, cost, benef);
+      eds.push_back(edge);
+    }
+
+    getline(file, line);
+    sstream.clear();  
+    sstream.str(line);
+    sstream >> tmp >> tmp >> tmp >> tmp >> tmp >> n_edges;
+
+    edges += n_edges;
+
+    for ( int i = 0 ; i < n_edges ; ++i ) {
+      getline(file, line);
+
+      sstream.clear();
+      sstream.str(line);
+
+      sstream >> src;
+      sstream >> dst;
+      sstream >> cost;
+      sstream >> benef;
+
+      Edge edge(src, dst, cost, benef);
+      eds.push_back(edge);
+    }
+
+    static Graph graph(vertex, edges, eds);
+
+    return &graph;
+
+    }  else cout << "Unable to open file"; 
+
+    return NULL;
+
+}
