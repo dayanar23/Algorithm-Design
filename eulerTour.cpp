@@ -294,7 +294,7 @@ void Graph::markVisited(Edge edge){
 
 Graph * buildGraph(string filename) {
 
-	// Auxiliar variables to easy the file reading
+	// Auxiliar variables to ease file reading
 	stringstream sstream;
 	string line; 
 	string tmp;
@@ -375,7 +375,7 @@ int main(int argc, char **argv){
 	string filename;
 
 	filename = argv[1];
-	
+
 	graph = buildGraph(filename);
 	graph-> eulerTour();
 
