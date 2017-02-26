@@ -1,8 +1,8 @@
 CXX = g++
 OPT = -g -Wall -O3
 
-main: eurelTour.cpp
-	$(CXX) $(OPT) eurelTour.cpp -o $@
+main: max_benefit.cpp
+	$(CXX) $(OPT) max_benefit.cpp -c -o $@
 	rm -f $*.c
 
 .PHONY: clean
