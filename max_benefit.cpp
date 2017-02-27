@@ -6,7 +6,9 @@
 
 using namespace std;
 
-  
+#define Ma 1200000000
+#define Mi -1200000000
+
 // return the node who has the minimun distance
 int minDistance(int dist[], bool sptSet[], Graph g){
   // Initialize min value
@@ -183,21 +185,33 @@ int secondPath(Graph g, int last_v){
     return getDistance(dist, 1);
 }
 
+// return the farthest vertex
 int minVertex(int dist[], int v){
   for (int i=v; i > 0; i--){
       cout << i << endl;
-    if(dist[i] < 1200000000 && dist[i] > -1200000000){
+    if(dist[i] < Ma && dist[i] > Mi){
       return i;
     }
   }
 }
+// standard deviation calculation
+// given the optimum value for an instance
+int dHeur(int vo, int voHeur) {
+    int sd = 100 * ((vo - voHeur) / vo);
+    return sd;
+}
 
 int main(int argc, char **argv) {
 
-  Graph *graph;
-  string filename;
+  Graph *graph;       // instance graph structure
+  string filename;    // input file name 
+
+  int vo, voHeur;     // optimum values
+  int sdHeur;          // standard deviation of the execution
+
 
   filename = argv[1];
+  vo = atoi(argv[2]);
 
   // build the graph with the instance info
   graph = buildGraph(filename);
@@ -207,8 +221,14 @@ int main(int argc, char **argv) {
   int v = minVertex(a, graph->vertex);
   int b = secondPath(*graph,v);
 
-  // return the Vo value
-  cout << v+b << endl;
+  // optimum value for the execution
+  voHeur = v+b;
+
+  // Standard deviation calculation
+  sdHeur = dHeur(vo, voHeur);
+
+  cout << voHeur << endl;
+  cout << sdHeur << endl;
   
   return 0;
 }
