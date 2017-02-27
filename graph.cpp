@@ -107,6 +107,7 @@ class Graph{
 
 };
 
+
 Graph * buildGraph(string filename) {
 
   // Auxiliar variables to ease file reading
@@ -148,7 +149,9 @@ Graph * buildGraph(string filename) {
       sstream >> benef;
 
       Edge edge(src, dst, cost, benef);
+      Edge edge2(dst, src, cost, benef);
       eds.push_back(edge);
+      eds.push_back(edge2);
     }
 
     getline(file, line);
@@ -170,10 +173,12 @@ Graph * buildGraph(string filename) {
       sstream >> benef;
 
       Edge edge(src, dst, cost, benef);
+      Edge edge2(dst,src, cost, benef);
       eds.push_back(edge);
+      eds.push_back(edge2);
     }
 
-    static Graph graph(vertex, edges, eds);
+    static Graph graph(vertex, edges*2,eds);
 
     return &graph;
 
