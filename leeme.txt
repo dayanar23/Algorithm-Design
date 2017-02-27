@@ -1,0 +1,3 @@
+Los archivos .txt con las soluciones se encuentran junto con sus instancias correspondientes en la carpeta instanciasPRPP. 
+Para compilar basta con ejecutar “make” seguido del comando “./main <instancia> <Vo-instancia>”.
+
