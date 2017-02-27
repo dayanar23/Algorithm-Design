@@ -186,19 +186,39 @@ int secondPath(Graph g, int last_v){
     return getDistance(dist, 0);
 }
 
+// standard deviation calculation
+// given the optimum value for an instance
+int dHeur(int vo, int voHeur) {
+    int sd = 100 * ((vo - voHeur) / vo);
+    return sd;
+}
+
 
 int main(int argc, char **argv) {
 
-  Graph *graph;
-  string filename;
+  Graph *graph;       // instance graph structure
+  string filename;    // input file name 
+
+  int vo, voHeur;     // optimum values
+  int sdHeur;          // standard deviation of the execution
+
 
   filename = argv[1];
+  vo = atoi(argv[2]);
 
+  // graph construction from input file specification
   graph = buildGraph(filename);
 
   printEdges(graph->a_list);
 
-  cout << firstPath(*graph,0) + secondPath(*graph,5) << endl;
+  // optimum value for the execution
+  voHeur = firstPath(*graph,0) + secondPath(*graph,5);
+
+  // Standard deviation calculation
+  sdHeur = dHeur(vo, voHeur);
+
+  cout << voHeur << endl;
+  cout << sdHeur << endl;
 
  /* 
   Edge e1(0,1,2,10);
