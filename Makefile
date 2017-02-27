@@ -2,7 +2,7 @@ CXX = g++
 OPT = -g -O3
 
 main: max_benefit.cpp
-	$(CXX) $(OPT) max_benefit.cpp -c -o $@
+	$(CXX) $(OPT) max_benefit.cpp -o $@
 	rm -f $*.c
 
 .PHONY: clean

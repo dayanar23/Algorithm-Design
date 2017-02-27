@@ -1,5 +1,6 @@
 // Module for calculate max benefit path
 #include <stdio.h>
+#include <stdlib.h>
 #include <limits.h>
 #include <vector>
 #include "graph.cpp"
@@ -188,7 +189,6 @@ int secondPath(Graph g, int last_v){
 // return the farthest vertex
 int minVertex(int dist[], int v){
   for (int i=v; i > 0; i--){
-      cout << i << endl;
     if(dist[i] < Ma && dist[i] > Mi){
       return i;
     }
@@ -229,6 +229,11 @@ int main(int argc, char **argv) {
 
   cout << voHeur << endl;
   cout << sdHeur << endl;
+
+
+  ofstream file((filename+"-salida.txt").c_str());
+  file << voHeur << endl;
+  file.close();
   
   return 0;
 }
