@@ -200,7 +200,7 @@ int main(int argc, char **argv) {
   string filename;    // input file name 
 
   int vo, voHeur;     // optimum values
-  int sdHeur;          // standard deviation of the execution
+  int sdHeur;         // standard deviation against given optimum value
 
 
   filename = argv[1];
